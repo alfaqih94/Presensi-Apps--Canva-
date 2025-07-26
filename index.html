@@ -952,64 +952,40 @@
       }
     </script>
 
-    <!-- 
-    ===== PANDUAN SETUP GOOGLE APPS SCRIPT =====
-    
-    1. Buka Google Apps Script (script.google.com)
-    2. Buat project baru
-    3. Ganti kode default dengan kode berikut:
-    
-    function doPost(e) {
-        try {
-            const data = JSON.parse(e.postData.contents);
-            const action = data.action;
-            const requestData = data.data || {};
-            
-            switch(action) {
-                case 'login':
-                    return ContentService.createTextOutput(JSON.stringify(login(requestData)));
-                case 'getRealtimeData':
-                    return ContentService.createTextOutput(JSON.stringify(getRealtimeData()));
-                case 'getEmployees':
-                    return ContentService.createTextOutput(JSON.stringify(getEmployees()));
-                case 'addEmployee':
-                    return ContentService.createTextOutput(JSON.stringify(addEmployee(requestData)));
-                case 'deleteEmployee':
-                    return ContentService.createTextOutput(JSON.stringify(deleteEmployee(requestData)));
-                case 'getStores':
-                    return ContentService.createTextOutput(JSON.stringify(getStores()));
-                case 'addStore':
-                    return ContentService.createTextOutput(JSON.stringify(addStore(requestData)));
-                case 'deleteStore':
-                    return ContentService.createTextOutput(JSON.stringify(deleteStore(requestData)));
-                case 'clockIn':
-                    return ContentService.createTextOutput(JSON.stringify(clockIn(requestData)));
-                case 'clockOut':
-                    return ContentService.createTextOutput(JSON.stringify(clockOut(requestData)));
-                case 'markStatus':
-                    return ContentService.createTextOutput(JSON.stringify(markStatus(requestData)));
-                case 'getTodayStatus':
-                    return ContentService.createTextOutput(JSON.stringify(getTodayStatus(requestData)));
-                case 'getEmployeeHistory':
-                    return ContentService.createTextOutput(JSON.stringify(getEmployeeHistory(requestData)));
-                case 'getMonthlyReports':
-                    return ContentService.createTextOutput(JSON.stringify(getMonthlyReports()));
-                default:
-                    return ContentService.createTextOutput(JSON.stringify({success: false, message: 'Invalid action'}));
-            }
-        } catch (error) {
-            return ContentService.createTextOutput(JSON.stringify({success: false, message: error.toString()}));
+    <script>
+      (function () {
+        function c() {
+          var b = a.contentDocument || a.contentWindow.document;
+          if (b) {
+            var d = b.createElement("script");
+            d.innerHTML =
+              "window.__CF$cv$params={r:'9655ff4f57f4dc19',t:'MTc1MzU1NDkzMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+            b.getElementsByTagName("head")[0].appendChild(d);
+          }
         }
-    }
-    
-    4. Implementasikan semua fungsi yang diperlukan untuk mengelola data di Google Sheets
-    5. Deploy sebagai web app dengan akses "Anyone"
-    6. Copy URL deployment dan ganti GOOGLE_SCRIPT_URL di atas
-    
-    Struktur Google Sheets yang diperlukan:
-    - Sheet "Employees": id, name, userID, password, role, store
-    - Sheet "Stores": id, name, startTime, endTime  
-    - Sheet "Attendance": id, employeeID, employeeName, date, clockIn, clockOut, status, reason
-    -->
+        if (document.body) {
+          var a = document.createElement("iframe");
+          a.height = 1;
+          a.width = 1;
+          a.style.position = "absolute";
+          a.style.top = 0;
+          a.style.left = 0;
+          a.style.border = "none";
+          a.style.visibility = "hidden";
+          document.body.appendChild(a);
+          if ("loading" !== document.readyState) c();
+          else if (window.addEventListener)
+            document.addEventListener("DOMContentLoaded", c);
+          else {
+            var e = document.onreadystatechange || function () {};
+            document.onreadystatechange = function (b) {
+              e(b);
+              "loading" !== document.readyState &&
+                ((document.onreadystatechange = e), c());
+            };
+          }
+        }
+      })();
+    </script>
   </body>
 </html>
