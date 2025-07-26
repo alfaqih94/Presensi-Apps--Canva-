@@ -389,7 +389,9 @@
       async function callGoogleScript(action, data = {}) {
         try {
           showLoading();
-
+          await fetch(GOOGLE_SCRIPT_URL + "?action=preflight", {
+            method: "OPTIONS",
+          });
           const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: "POST",
             headers: {
@@ -400,23 +402,52 @@
               data: data,
             }),
           });
-
-          const result = await response.json();
-
-          if (result.success) {
-            return result.data;
-          } else {
-            throw new Error(result.message || "Unknown error");
-          }
         } catch (error) {
           console.error("API Error:", error);
-          showError(error.message);
+          showError(error.message || "Failed to connect to server");
           return null;
         } finally {
           hideLoading();
         }
       }
+      function login(requestData) {
+        const { userID, password } = requestData;
+        const usersSheet = getSheet(SHEET_NAMES.USERS);
+        const users = getRowsData(usersSheet);
 
+        // Debugging: Log jumlah user
+        console.log("Total users:", users.length);
+
+        const user = users.find(
+          (u) => u.userID == userID && u.password == password
+        );
+
+        if (user) {
+          return {
+            success: true,
+            data: {
+              id: user.id,
+              name: user.name,
+              role: user.role,
+              store: user.store,
+              userID: user.userID,
+            },
+          };
+        } else {
+          return {
+            success: false,
+            message: "User ID atau password salah",
+          };
+        }
+      }
+      function testLogin() {
+        console.log(
+          login({
+            userID: "admin",
+            password: "admin123",
+          })
+        );
+      }
       // ===== FUNGSI LOGIN =====
       document
         .getElementById("loginForm")
