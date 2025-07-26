@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Absensi Karyawan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      .gradient-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+      .card-shadow {
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      }
+      .btn-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      }
+      .btn-warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      }
+      .btn-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      }
+      .animate-fade-in {
+        animation: fadeIn 0.5s ease-in;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <!-- Configuration Notice -->
+    <div
+      id="configNotice"
+      class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4"
+    >
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm">
+            <strong>Setup Required:</strong> Silakan konfigurasi Google Apps
+            Script URL di bagian bawah kode JavaScript.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div
+      id="loginScreen"
+      class="min-h-screen gradient-bg flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-white rounded-2xl card-shadow p-8 w-full max-w-sm animate-fade-in"
+      >
+        <div class="text-center mb-8">
+          <div
+            class="bg-indigo-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4"
+          >
+            <i class="fas fa-user-clock text-3xl text-indigo-600"></i>
+          </div>
+          <h1 class="text-2xl font-bold text-gray-800">Absensi Karyawan</h1>
+          <p class="text-gray-600 mt-2">Masuk ke akun Anda</p>
+        </div>
+
+        <form id="loginForm" class="space-y-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >User ID</label
+            >
+            <input
+              type="text"
+              id="loginUserID"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              placeholder="Masukkan User ID"
+              required
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Password</label
+            >
+            <input
+              type="password"
+              id="loginPassword"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              placeholder="Masukkan Password"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            id="loginBtn"
+            class="w-full btn-primary text-white py-3 rounded-lg font-medium hover:opacity-90 transition-opacity"
+          >
+            <i class="fas fa-sign-in-alt mr-2"></i>Masuk
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="hidden">
+      <!-- Header -->
+      <div class="gradient-bg text-white p-4 sticky top-0 z-50">
+        <div class="flex justify-between items-center">
+          <div>
+            <h1 class="text-xl font-bold">Admin Dashboard</h1>
+            <p class="text-sm opacity-90" id="adminDateTime"></p>
+          </div>
+          <button
+            onclick="logout()"
+            class="bg-white bg-opacity-20 p-2 rounded-lg"
+          >
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Admin Menu -->
+      <div class="p-4 space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <button
+            onclick="showAdminSection('realtime')"
+            class="bg-white card-shadow p-4 rounded-xl text-center hover:bg-gray-50 transition-colors"
+          >
+            <i class="fas fa-chart-line text-2xl text-blue-600 mb-2"></i>
+            <p class="font-medium text-gray-800">Data Realtime</p>
+          </button>
+
+          <button
+            onclick="showAdminSection('employees')"
+            class="bg-white card-shadow p-4 rounded-xl text-center hover:bg-gray-50 transition-colors"
+          >
+            <i class="fas fa-users text-2xl text-green-600 mb-2"></i>
+            <p class="font-medium text-gray-800">Data Karyawan</p>
+          </button>
+
+          <button
+            onclick="showAdminSection('reports')"
+            class="bg-white card-shadow p-4 rounded-xl text-center hover:bg-gray-50 transition-colors"
+          >
+            <i class="fas fa-file-alt text-2xl text-purple-600 mb-2"></i>
+            <p class="font-medium text-gray-800">Report Bulanan</p>
+          </button>
+
+          <button
+            onclick="showAdminSection('stores')"
+            class="bg-white card-shadow p-4 rounded-xl text-center hover:bg-gray-50 transition-colors"
+          >
+            <i class="fas fa-store text-2xl text-orange-600 mb-2"></i>
+            <p class="font-medium text-gray-800">Data Toko</p>
+          </button>
+        </div>
+      </div>
+
+      <!-- Admin Sections -->
+      <div id="adminContent" class="p-4"></div>
+    </div>
+
+    <!-- Employee Dashboard -->
+    <div id="employeeDashboard" class="hidden">
+      <!-- Header -->
+      <div class="gradient-bg text-white p-4">
+        <div class="flex justify-between items-center">
+          <div>
+            <h1 class="text-xl font-bold" id="employeeName">Selamat Datang</h1>
+            <p class="text-sm opacity-90" id="employeeDateTime"></p>
+          </div>
+          <button
+            onclick="logout()"
+            class="bg-white bg-opacity-20 p-2 rounded-lg"
+          >
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Employee Actions -->
+      <div class="p-4 space-y-4">
+        <!-- Clock In/Out Buttons -->
+        <div class="grid grid-cols-2 gap-4">
+          <button
+            onclick="clockIn()"
+            class="btn-success text-white p-4 rounded-xl font-medium hover:opacity-90 transition-opacity"
+          >
+            <i class="fas fa-clock mr-2"></i>Masuk
+          </button>
+
+          <button
+            onclick="clockOut()"
+            class="btn-danger text-white p-4 rounded-xl font-medium hover:opacity-90 transition-opacity"
+          >
+            <i class="fas fa-clock mr-2"></i>Pulang
+          </button>
+        </div>
+
+        <!-- Status Buttons -->
+        <div class="grid grid-cols-2 gap-4">
+          <button
+            onclick="markPermission()"
+            class="btn-warning text-white p-4 rounded-xl font-medium hover:opacity-90 transition-opacity"
+          >
+            <i class="fas fa-calendar-times mr-2"></i>Izin
+          </button>
+
+          <button
+            onclick="markSick()"
+            class="bg-red-500 text-white p-4 rounded-xl font-medium hover:bg-red-600 transition-colors"
+          >
+            <i class="fas fa-thermometer-half mr-2"></i>Sakit
+          </button>
+        </div>
+
+        <!-- History Button -->
+        <button
+          onclick="showHistory()"
+          class="w-full bg-white card-shadow p-4 rounded-xl font-medium text-gray-800 hover:bg-gray-50 transition-colors"
+        >
+          <i class="fas fa-history mr-2 text-indigo-600"></i>History Absensi
+        </button>
+
+        <!-- Today's Status -->
+        <div class="bg-white card-shadow p-4 rounded-xl">
+          <h3 class="font-bold text-gray-800 mb-3">Status Hari Ini</h3>
+          <div id="todayStatus" class="space-y-2">
+            <div class="flex justify-between">
+              <span class="text-gray-600">Masuk:</span>
+              <span id="todayClockIn" class="font-medium">-</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Pulang:</span>
+              <span id="todayClockOut" class="font-medium">-</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Status:</span>
+              <span id="todayStatusText" class="font-medium text-gray-500"
+                >-</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for Reason Input -->
+    <div
+      id="reasonModal"
+      class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+    >
+      <div class="bg-white rounded-2xl p-6 w-full max-w-sm">
+        <h3 class="text-lg font-bold text-gray-800 mb-4" id="reasonModalTitle">
+          Keterangan
+        </h3>
+        <textarea
+          id="reasonInput"
+          class="w-full p-3 border border-gray-300 rounded-lg resize-none"
+          rows="4"
+          placeholder="Masukkan keterangan..."
+          required
+        ></textarea>
+        <div class="flex gap-3 mt-4">
+          <button
+            onclick="closeReasonModal()"
+            class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg font-medium"
+          >
+            Batal
+          </button>
+          <button
+            onclick="submitReason()"
+            class="flex-1 btn-primary text-white py-2 rounded-lg font-medium"
+          >
+            Simpan
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div
+      id="loadingOverlay"
+      class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+      <div class="bg-white rounded-lg p-6 text-center">
+        <div class="loading mx-auto mb-4"></div>
+        <p class="text-gray-600">Memproses...</p>
+      </div>
+    </div>
+
+    <script>
+      // ===== KONFIGURASI GOOGLE APPS SCRIPT =====
+      // Ganti URL ini dengan URL Google Apps Script Anda
+      const GOOGLE_SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycbwPUd6HwdO9lxnP3svzzkNthJqRpvvBKTbPTW6JeIQgN0IdLIMe3qs6rMJQwnVxx6F5dw/exec";
+
+      // ===== VARIABEL GLOBAL =====
+      let currentUser = null;
+      let currentReasonType = null;
+      let employees = [];
+      let stores = [];
+      let attendance = [];
+
+      // ===== INISIALISASI =====
+      document.addEventListener("DOMContentLoaded", function () {
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+
+        // Hide config notice if script URL is configured
+        if (GOOGLE_SCRIPT_URL.includes("YOUR_SCRIPT_ID")) {
+          document.getElementById("configNotice").style.display = "block";
+        } else {
+          document.getElementById("configNotice").style.display = "none";
+        }
+      });
+
+      // ===== FUNGSI UTILITAS =====
+      function showLoading() {
+        document.getElementById("loadingOverlay").classList.remove("hidden");
+      }
+
+      function hideLoading() {
+        document.getElementById("loadingOverlay").classList.add("hidden");
+      }
+
+      function showError(message) {
+        alert("Error: " + message);
+      }
+
+      function updateDateTime() {
+        const now = new Date();
+        const options = {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        };
+        const dateTimeString = now.toLocaleDateString("id-ID", options);
+
+        const adminDateTime = document.getElementById("adminDateTime");
+        const employeeDateTime = document.getElementById("employeeDateTime");
+
+        if (adminDateTime) adminDateTime.textContent = dateTimeString;
+        if (employeeDateTime) employeeDateTime.textContent = dateTimeString;
+      }
+
+      // ===== FUNGSI API GOOGLE APPS SCRIPT =====
+      async function callGoogleScript(action, data = {}) {
+        try {
+          showLoading();
+
+          const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              action: action,
+              data: data,
+            }),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            return result.data;
+          } else {
+            throw new Error(result.message || "Unknown error");
+          }
+        } catch (error) {
+          console.error("API Error:", error);
+          showError(error.message);
+          return null;
+        } finally {
+          hideLoading();
+        }
+      }
+
+      // ===== FUNGSI LOGIN =====
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const userID = document.getElementById("loginUserID").value;
+          const password = document.getElementById("loginPassword").value;
+
+          const user = await callGoogleScript("login", { userID, password });
+
+          if (user) {
+            currentUser = user;
+            document.getElementById("loginScreen").classList.add("hidden");
+
+            if (user.role === "admin") {
+              document
+                .getElementById("adminDashboard")
+                .classList.remove("hidden");
+            } else {
+              document
+                .getElementById("employeeDashboard")
+                .classList.remove("hidden");
+              document.getElementById(
+                "employeeName"
+              ).textContent = `Selamat Datang, ${user.name}`;
+              await updateTodayStatus();
+            }
+          }
+        });
+
+      function logout() {
+        currentUser = null;
+        document.getElementById("loginScreen").classList.remove("hidden");
+        document.getElementById("adminDashboard").classList.add("hidden");
+        document.getElementById("employeeDashboard").classList.add("hidden");
+        document.getElementById("loginUserID").value = "";
+        document.getElementById("loginPassword").value = "";
+      }
+
+      // ===== FUNGSI ADMIN =====
+      async function showAdminSection(section) {
+        switch (section) {
+          case "realtime":
+            await showRealtimeData();
+            break;
+          case "employees":
+            await showEmployeeManagement();
+            break;
+          case "reports":
+            await showReports();
+            break;
+          case "stores":
+            await showStoreManagement();
+            break;
+        }
+      }
+
+      async function showRealtimeData() {
+        const data = await callGoogleScript("getRealtimeData");
+        if (!data) return;
+
+        const { employees: allEmployees, todayAttendance } = data;
+
+        let html = `
+                <div class="bg-white card-shadow rounded-xl p-4 animate-fade-in">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4">Data Realtime - ${new Date().toLocaleDateString(
+                      "id-ID"
+                    )}</h2>
+                    <div class="space-y-3">
+            `;
+
+        allEmployees.forEach((emp) => {
+          const empAttendance = todayAttendance.find(
+            (att) => att.employeeID === emp.id
+          );
+
+          let statusBadge = "";
+          let statusText = "Belum Absen";
+          let statusClass = "bg-gray-100 text-gray-600";
+          let clockInfo = "";
+
+          if (empAttendance) {
+            if (empAttendance.status === "present") {
+              statusText = "Hadir";
+              statusClass = "bg-green-100 text-green-800";
+              clockInfo = `
+                            <div class="text-xs text-gray-600 mt-1">
+                                Masuk: ${
+                                  empAttendance.clockIn || "-"
+                                } | Pulang: ${empAttendance.clockOut || "-"}
+                            </div>
+                        `;
+            } else if (empAttendance.status === "permission") {
+              statusText = "Izin";
+              statusClass = "bg-yellow-100 text-yellow-800";
+              clockInfo = empAttendance.reason
+                ? `<div class="text-xs text-gray-600 mt-1">Keterangan: ${empAttendance.reason}</div>`
+                : "";
+            } else if (empAttendance.status === "sick") {
+              statusText = "Sakit";
+              statusClass = "bg-red-100 text-red-800";
+              clockInfo = empAttendance.reason
+                ? `<div class="text-xs text-gray-600 mt-1">Keterangan: ${empAttendance.reason}</div>`
+                : "";
+            }
+          }
+
+          statusBadge = `<span class="${statusClass} px-2 py-1 rounded-full text-xs font-medium">${statusText}</span>`;
+
+          html += `
+                    <div class="border border-gray-200 rounded-lg p-3">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <h3 class="font-medium text-gray-800">${emp.name}</h3>
+                                <p class="text-sm text-gray-600">${emp.store}</p>
+                                ${clockInfo}
+                            </div>
+                            <div class="ml-3">
+                                ${statusBadge}
+                            </div>
+                        </div>
+                    </div>
+                `;
+        });
+
+        html += `</div></div>`;
+        document.getElementById("adminContent").innerHTML = html;
+      }
+
+      async function showEmployeeManagement() {
+        const employees = await callGoogleScript("getEmployees");
+        if (!employees) return;
+
+        let html = `
+                <div class="bg-white card-shadow rounded-xl p-4 animate-fade-in">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold text-gray-800">Manajemen Karyawan</h2>
+                        <button onclick="showAddEmployeeForm()" class="btn-primary text-white px-4 py-2 rounded-lg text-sm">
+                            <i class="fas fa-plus mr-1"></i>Tambah
+                        </button>
+                    </div>
+                    <div class="space-y-3">
+            `;
+
+        employees.forEach((emp) => {
+          html += `
+                    <div class="border border-gray-200 rounded-lg p-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-medium text-gray-800">${emp.name}</h3>
+                                <p class="text-sm text-gray-600">ID: ${emp.userID}</p>
+                                <p class="text-sm text-gray-600">Cabang: ${emp.store}</p>
+                            </div>
+                            <button onclick="deleteEmployee(${emp.id})" class="text-red-500 hover:text-red-700">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+        });
+
+        html += `</div></div>`;
+        document.getElementById("adminContent").innerHTML = html;
+      }
+
+      async function showAddEmployeeForm() {
+        const stores = await callGoogleScript("getStores");
+        if (!stores) return;
+
+        let storeOptions = stores
+          .map(
+            (store) => `<option value="${store.name}">${store.name}</option>`
+          )
+          .join("");
+
+        let html = `
+                <div class="bg-white card-shadow rounded-xl p-4 animate-fade-in">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4">Tambah Karyawan</h2>
+                    <form id="addEmployeeForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama</label>
+                            <input type="text" id="empName" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">User ID</label>
+                            <input type="text" id="empUserID" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <input type="password" id="empPassword" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Cabang</label>
+                            <select id="empStore" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required>
+                                <option value="">Pilih Cabang</option>
+                                ${storeOptions}
+                            </select>
+                        </div>
+                        <div class="flex gap-3">
+                            <button type="button" onclick="showEmployeeManagement()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg">Batal</button>
+                            <button type="submit" class="flex-1 btn-primary text-white py-2 rounded-lg">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+
+        document.getElementById("adminContent").innerHTML = html;
+
+        document
+          .getElementById("addEmployeeForm")
+          .addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const newEmployee = {
+              name: document.getElementById("empName").value,
+              userID: document.getElementById("empUserID").value,
+              password: document.getElementById("empPassword").value,
+              store: document.getElementById("empStore").value,
+            };
+
+            const result = await callGoogleScript("addEmployee", newEmployee);
+            if (result) {
+              await showEmployeeManagement();
+            }
+          });
+      }
+
+      async function deleteEmployee(id) {
+        if (confirm("Yakin ingin menghapus karyawan ini?")) {
+          const result = await callGoogleScript("deleteEmployee", { id });
+          if (result) {
+            await showEmployeeManagement();
+          }
+        }
+      }
+
+      async function showReports() {
+        const reports = await callGoogleScript("getMonthlyReports");
+        if (!reports) return;
+
+        const currentMonth = new Date().toISOString().slice(0, 7);
+
+        let html = `
+                <div class="bg-white card-shadow rounded-xl p-4 animate-fade-in">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4">Report Bulanan - ${currentMonth}</h2>
+                    <div class="space-y-3">
+            `;
+
+        reports.forEach((report) => {
+          html += `
+                    <div class="border border-gray-200 rounded-lg p-3">
+                        <h3 class="font-medium text-gray-800 mb-2">${report.name} - ${report.store}</h3>
+                        <div class="grid grid-cols-3 gap-2 text-sm">
+                            <div class="text-center">
+                                <div class="text-green-600 font-bold">${report.presentDays}</div>
+                                <div class="text-gray-600">Hadir</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-yellow-600 font-bold">${report.permissionDays}</div>
+                                <div class="text-gray-600">Izin</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-red-600 font-bold">${report.sickDays}</div>
+                                <div class="text-gray-600">Sakit</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+        });
+
+        html += `</div></div>`;
+        document.getElementById("adminContent").innerHTML = html;
+      }
+
+      async function showStoreManagement() {
+        const stores = await callGoogleScript("getStores");
+        if (!stores) return;
+
+        let html = `
+                <div class="bg-white card-shadow rounded-xl p-4 animate-fade-in">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold text-gray-800">Data Toko</h2>
+                        <button onclick="showAddStoreForm()" class="btn-primary text-white px-4 py-2 rounded-lg text-sm">
+                            <i class="fas fa-plus mr-1"></i>Tambah
+                        </button>
+                    </div>
+                    <div class="space-y-3">
+            `;
+
+        stores.forEach((store) => {
+          html += `
+                    <div class="border border-gray-200 rounded-lg p-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-medium text-gray-800">${store.name}</h3>
+                                <p class="text-sm text-gray-600">Jam Masuk: ${store.startTime}</p>
+                                <p class="text-sm text-gray-600">Jam Pulang: ${store.endTime}</p>
+                            </div>
+                            <button onclick="deleteStore(${store.id})" class="text-red-500 hover:text-red-700">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+        });
+
+        html += `</div></div>`;
+        document.getElementById("adminContent").innerHTML = html;
+      }
+
+      async function showAddStoreForm() {
+        let html = `
+                <div class="bg-white card-shadow rounded-xl p-4 animate-fade-in">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4">Tambah Toko</h2>
+                    <form id="addStoreForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Cabang</label>
+                            <input type="text" id="storeName" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Jam Masuk</label>
+                            <input type="time" id="storeStartTime" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Jam Pulang</label>
+                            <input type="time" id="storeEndTime" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required>
+                        </div>
+                        <div class="flex gap-3">
+                            <button type="button" onclick="showStoreManagement()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg">Batal</button>
+                            <button type="submit" class="flex-1 btn-primary text-white py-2 rounded-lg">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+
+        document.getElementById("adminContent").innerHTML = html;
+
+        document
+          .getElementById("addStoreForm")
+          .addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const newStore = {
+              name: document.getElementById("storeName").value,
+              startTime: document.getElementById("storeStartTime").value,
+              endTime: document.getElementById("storeEndTime").value,
+            };
+
+            const result = await callGoogleScript("addStore", newStore);
+            if (result) {
+              await showStoreManagement();
+            }
+          });
+      }
+
+      async function deleteStore(id) {
+        if (confirm("Yakin ingin menghapus toko ini?")) {
+          const result = await callGoogleScript("deleteStore", { id });
+          if (result) {
+            await showStoreManagement();
+          }
+        }
+      }
+
+      // ===== FUNGSI EMPLOYEE =====
+      async function clockIn() {
+        const result = await callGoogleScript("clockIn", {
+          employeeID: currentUser.id,
+        });
+        if (result) {
+          alert("Absen masuk berhasil!");
+          await updateTodayStatus();
+        }
+      }
+
+      async function clockOut() {
+        const result = await callGoogleScript("clockOut", {
+          employeeID: currentUser.id,
+        });
+        if (result) {
+          alert("Absen pulang berhasil!");
+          await updateTodayStatus();
+        }
+      }
+
+      function markPermission() {
+        currentReasonType = "permission";
+        document.getElementById("reasonModalTitle").textContent =
+          "Keterangan Izin";
+        document.getElementById("reasonModal").classList.remove("hidden");
+      }
+
+      function markSick() {
+        currentReasonType = "sick";
+        document.getElementById("reasonModalTitle").textContent =
+          "Keterangan Sakit";
+        document.getElementById("reasonModal").classList.remove("hidden");
+      }
+
+      function closeReasonModal() {
+        document.getElementById("reasonModal").classList.add("hidden");
+        document.getElementById("reasonInput").value = "";
+        currentReasonType = null;
+      }
+
+      async function submitReason() {
+        const reason = document.getElementById("reasonInput").value.trim();
+        if (!reason) {
+          alert("Harap masukkan keterangan!");
+          return;
+        }
+
+        const result = await callGoogleScript("markStatus", {
+          employeeID: currentUser.id,
+          status: currentReasonType,
+          reason: reason,
+        });
+
+        if (result) {
+          closeReasonModal();
+          alert(
+            `Status ${
+              currentReasonType === "permission" ? "izin" : "sakit"
+            } berhasil disimpan!`
+          );
+          await updateTodayStatus();
+        }
+      }
+
+      async function updateTodayStatus() {
+        const todayRecord = await callGoogleScript("getTodayStatus", {
+          employeeID: currentUser.id,
+        });
+
+        if (todayRecord) {
+          document.getElementById("todayClockIn").textContent =
+            todayRecord.clockIn || "-";
+          document.getElementById("todayClockOut").textContent =
+            todayRecord.clockOut || "-";
+
+          let statusText = "-";
+          let statusClass = "text-gray-500";
+
+          if (todayRecord.status === "present") {
+            statusText = "Hadir";
+            statusClass = "text-green-600";
+          } else if (todayRecord.status === "permission") {
+            statusText = "Izin";
+            statusClass = "text-yellow-600";
+          } else if (todayRecord.status === "sick") {
+            statusText = "Sakit";
+            statusClass = "text-red-600";
+          }
+
+          const statusElement = document.getElementById("todayStatusText");
+          statusElement.textContent = statusText;
+          statusElement.className = `font-medium ${statusClass}`;
+        }
+      }
+
+      async function showHistory() {
+        const history = await callGoogleScript("getEmployeeHistory", {
+          employeeID: currentUser.id,
+        });
+        if (!history) return;
+
+        let html = `
+                <div class="bg-white card-shadow rounded-xl p-4 animate-fade-in">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold text-gray-800">History Absensi (7 Hari)</h2>
+                        <button onclick="document.body.removeChild(document.querySelector('.fixed.inset-0'))" class="text-gray-500">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="space-y-3">
+            `;
+
+        if (history.length === 0) {
+          html +=
+            '<p class="text-gray-500 text-center py-4">Belum ada data absensi</p>';
+        } else {
+          history.forEach((att) => {
+            let statusBadge = "";
+            if (att.status === "present") {
+              statusBadge =
+                '<span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Hadir</span>';
+            } else if (att.status === "permission") {
+              statusBadge =
+                '<span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">Izin</span>';
+            } else if (att.status === "sick") {
+              statusBadge =
+                '<span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">Sakit</span>';
+            }
+
+            html += `
+                        <div class="border border-gray-200 rounded-lg p-3">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="font-medium text-gray-800">${
+                                  att.date
+                                }</div>
+                                ${statusBadge}
+                            </div>
+                            <div class="text-sm text-gray-600 space-y-1">
+                                <div class="flex justify-between">
+                                    <span>Masuk:</span>
+                                    <span>${att.clockIn || "-"}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Pulang:</span>
+                                    <span>${att.clockOut || "-"}</span>
+                                </div>
+                                ${
+                                  att.reason
+                                    ? `<div class="text-xs text-gray-500 mt-2">Keterangan: ${att.reason}</div>`
+                                    : ""
+                                }
+                            </div>
+                        </div>
+                    `;
+          });
+        }
+
+        html += `</div></div>`;
+
+        // Show in employee dashboard
+        const historyContainer = document.createElement("div");
+        historyContainer.innerHTML = html;
+        historyContainer.className =
+          "fixed inset-0 bg-gray-50 z-50 overflow-y-auto";
+        historyContainer.style.paddingTop = "1rem";
+        document.body.appendChild(historyContainer);
+      }
+    </script>
+
+    <!-- 
+    ===== PANDUAN SETUP GOOGLE APPS SCRIPT =====
+    
+    1. Buka Google Apps Script (script.google.com)
+    2. Buat project baru
+    3. Ganti kode default dengan kode berikut:
+    
+    function doPost(e) {
+        try {
+            const data = JSON.parse(e.postData.contents);
+            const action = data.action;
+            const requestData = data.data || {};
+            
+            switch(action) {
+                case 'login':
+                    return ContentService.createTextOutput(JSON.stringify(login(requestData)));
+                case 'getRealtimeData':
+                    return ContentService.createTextOutput(JSON.stringify(getRealtimeData()));
+                case 'getEmployees':
+                    return ContentService.createTextOutput(JSON.stringify(getEmployees()));
+                case 'addEmployee':
+                    return ContentService.createTextOutput(JSON.stringify(addEmployee(requestData)));
+                case 'deleteEmployee':
+                    return ContentService.createTextOutput(JSON.stringify(deleteEmployee(requestData)));
+                case 'getStores':
+                    return ContentService.createTextOutput(JSON.stringify(getStores()));
+                case 'addStore':
+                    return ContentService.createTextOutput(JSON.stringify(addStore(requestData)));
+                case 'deleteStore':
+                    return ContentService.createTextOutput(JSON.stringify(deleteStore(requestData)));
+                case 'clockIn':
+                    return ContentService.createTextOutput(JSON.stringify(clockIn(requestData)));
+                case 'clockOut':
+                    return ContentService.createTextOutput(JSON.stringify(clockOut(requestData)));
+                case 'markStatus':
+                    return ContentService.createTextOutput(JSON.stringify(markStatus(requestData)));
+                case 'getTodayStatus':
+                    return ContentService.createTextOutput(JSON.stringify(getTodayStatus(requestData)));
+                case 'getEmployeeHistory':
+                    return ContentService.createTextOutput(JSON.stringify(getEmployeeHistory(requestData)));
+                case 'getMonthlyReports':
+                    return ContentService.createTextOutput(JSON.stringify(getMonthlyReports()));
+                default:
+                    return ContentService.createTextOutput(JSON.stringify({success: false, message: 'Invalid action'}));
+            }
+        } catch (error) {
+            return ContentService.createTextOutput(JSON.stringify({success: false, message: error.toString()}));
+        }
+    }
+    
+    4. Implementasikan semua fungsi yang diperlukan untuk mengelola data di Google Sheets
+    5. Deploy sebagai web app dengan akses "Anyone"
+    6. Copy URL deployment dan ganti GOOGLE_SCRIPT_URL di atas
+    
+    Struktur Google Sheets yang diperlukan:
+    - Sheet "Employees": id, name, userID, password, role, store
+    - Sheet "Stores": id, name, startTime, endTime  
+    - Sheet "Attendance": id, employeeID, employeeName, date, clockIn, clockOut, status, reason
+    -->
+    <script>
+      (function () {
+        function c() {
+          var b = a.contentDocument || a.contentWindow.document;
+          if (b) {
+            var d = b.createElement("script");
+            d.innerHTML =
+              "window.__CF$cv$params={r:'9655ff4f57f4dc19',t:'MTc1MzU1NDkzMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+            b.getElementsByTagName("head")[0].appendChild(d);
+          }
+        }
+        if (document.body) {
+          var a = document.createElement("iframe");
+          a.height = 1;
+          a.width = 1;
+          a.style.position = "absolute";
+          a.style.top = 0;
+          a.style.left = 0;
+          a.style.border = "none";
+          a.style.visibility = "hidden";
+          document.body.appendChild(a);
+          if ("loading" !== document.readyState) c();
+          else if (window.addEventListener)
+            document.addEventListener("DOMContentLoaded", c);
+          else {
+            var e = document.onreadystatechange || function () {};
+            document.onreadystatechange = function (b) {
+              e(b);
+              "loading" !== document.readyState &&
+                ((document.onreadystatechange = e), c());
+            };
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>
